@@ -7,7 +7,7 @@ const blogSchema = new Schema(
             required: true
         },
 
-        image: {
+        blogImage: {
             type: String, //cloudinary URL
             required: true
         },
@@ -23,17 +23,19 @@ const blogSchema = new Schema(
         },
 
         author: {
-            id: {
+            _id: {
                 type: Schema.Types.ObjectId,
-                ref: "User"
+                ref: "User",
+                required: true
             },
 
-            name: {
+            username: {
                 type: String,
                 required: true
             },
             avatar:{
                 type: String, // cloudinry URL
+                required: true
             }
         }
     },{timestamps : true}
