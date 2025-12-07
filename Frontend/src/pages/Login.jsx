@@ -1,8 +1,11 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { Link, redirect, useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import logo from '../assets/logo.png'
 import { toast } from 'react-toastify'
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
+const LOGIN_ENDPOINT = `${API_BASE_URL}/api/users/login`
 
 function Login() {
   const {
@@ -13,17 +16,40 @@ function Login() {
   } = useForm({
     defaultValues: { email: '', password: '' }
   })
-  const navigate = useNavigate();
+
+  const [serverError, setServerError] = useState('')
+  const navigate = useNavigate()
+
   const onSubmit = async (data) => {
+    setServerError('')
+
     try {
-      await new Promise((r) => setTimeout(r, 1000))
-      console.log('Login data:', data)
-      toast.success('Logged in successfully!')
+      const response = await fetch(LOGIN_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: data.email,
+          password: data.password
+        }),
+        credentials: 'include'
+      })
+
+      const contentType = response.headers.get('content-type') || ''
+      let result = null
+
+      if (contentType.includes('application/json')) {
+        result = await response.json()
+      } else {
+        setServerError('Wrong Email or Password')
+        return
+      }
+
+      toast.success(result.message || 'Logged in successfully!')
       reset({ password: '' })
-      navigate('/', {replace: true})
+      navigate('/', { replace: true })
     } catch (e) {
-      console.error(e)
-      toast.error(('Login failed, try again.'))
+      console.error('Login error:', e)
+      setServerError('Login failed, please try again later.')
     }
   }
 
@@ -46,21 +72,25 @@ function Login() {
             <input
               id="email"
               type="email"
-              placeholder="Example@gmail.com"
-              className={`w-full px-4 py-2 border ${errors.email ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-2 focus:ring-teal-500 outline-none transition`}
+              placeholder="example@gmail.com"
+              className={`w-full px-4 py-2 border ${
+                errors.email ? 'border-red-500' : 'border-gray-300'
+              } rounded-lg focus:ring-2 focus:ring-teal-500 outline-none transition`}
               {...register('email', {
                 required: 'Email is required',
                 pattern: {
                   value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                  message: 'Enter a valid email',
-                },
+                  message: 'Enter a valid email'
+                }
               })}
             />
-            {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>}
+            {errors.email && (
+              <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
+            )}
           </div>
 
           {/* Password */}
-          <div className="mb-6">
+          <div className="mb-4">
             <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
               Password
             </label>
@@ -68,15 +98,24 @@ function Login() {
               id="password"
               type="password"
               placeholder="Your password"
-              className={`w-full px-4 py-2 border ${errors.password ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-2 focus:ring-teal-500 outline-none transition`}
+              className={`w-full px-4 py-2 border ${
+                errors.password ? 'border-red-500' : 'border-gray-300'
+              } rounded-lg focus:ring-2 focus:ring-teal-500 outline-none transition`}
               {...register('password', {
                 required: 'Password is required',
-                minLength: { value: 6, message: 'Minimum 6 characters' },
+                minLength: { value: 6, message: 'Minimum 6 characters' }
               })}
             />
-            {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>}
+            {errors.password && (
+              <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>
+            )}
           </div>
-  
+
+          {/* Auth / server error */}
+          {serverError && (
+            <p className="text-red-500 text-sm mb-3 text-center">{serverError}</p>
+          )}
+
           {/* Submit */}
           <button
             type="submit"
@@ -87,9 +126,13 @@ function Login() {
           >
             {isSubmitting ? 'Signing in...' : 'Sign in'}
           </button>
-          <div className='flex justify-center pt-4 gap-2'>
-            <p className='text-sm text-center'>Don't Have the Account ?</p>
-            <Link to="/register" className='text-sm text-center font-semibold text-blue-600 hover:underline hover:text-blue-800 duration-300'>
+
+          <div className="flex justify-center pt-4 gap-2">
+            <p className="text-sm text-center">Don't have an account?</p>
+            <Link
+              to="/register"
+              className="text-sm text-center font-semibold text-blue-600 hover:underline hover:text-blue-800 duration-300"
+            >
               Sign up
             </Link>
           </div>

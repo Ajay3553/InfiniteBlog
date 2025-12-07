@@ -1,9 +1,14 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import logo from '../assets/logo.png'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import Container from './Container.jsx'
+import { toast } from 'react-toastify'
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
+const LOGOUT_ENDPOINT = `${API_BASE_URL}/api/users/logout`
 
 function Header() {
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
     const navItems = [
         {
             name: 'Home',
@@ -23,7 +28,37 @@ function Header() {
         }
     ]
     const navigate = useNavigate();
-  return (
+    const location = useLocation();
+
+    const checkAuthCookie = () => {
+        const hasToken = document.cookie
+        .split('; ')
+        .some((row) => row.startsWith('accessToken='));
+
+        setIsLoggedIn(hasToken);
+    }
+
+    useEffect(() => {
+        checkAuthCookie()
+    }, [location.pathname])
+
+    const handleLogout = async () => {
+        try{
+            const result = await fetch(LOGOUT_ENDPOINT, {
+                method: 'POST',
+                credentials: 'include'
+            })
+
+            setIsLoggedIn(false)
+            toast.success("Logged Out Successfully")
+            navigate('/')
+        }
+        catch(e){
+            console.error(e);
+        }
+    }
+
+    return (
         <header className='mt-2 mb-2'>
             <Container>
                 <nav className='flex items-center justify-between'>
@@ -35,15 +70,31 @@ function Header() {
                     <ul className='flex items-center gap-2 text-xs sm:text-base'>
                         {navItems.map((item) => (
                             <li key={item.name}>
-                                <a href={item.slug} className='inline-block mx-2 cursor-pointer hover:text-blue-500 hover:text-[18px] duration-400'>
-                                    {item.name}
-                                </a>
+                                <Link 
+                                to={item.slug} 
+                                className="inline-block mx-2 cursor-pointer hover:text-blue-500 hover:text-[18px] duration-400"
+                                >
+                                {item.name}
+                                </Link>
                             </li>
                         ))}
                     </ul>
-                    <a href="/login" className='inline-block text-xs sm:text-base px-5 py-2 cursor-pointer rounded-3xl text-white bg-blue-400 hover:bg-blue-600 hover:text-gray-300 duration-400'>
+                    
+                    {isLoggedIn ? (
+                        <button
+                        onClick={handleLogout}
+                        className="inline-block text-xs sm:text-base px-5 py-2 cursor-pointer rounded-3xl text-white bg-red-400 hover:bg-red-600 hover:text-gray-100 duration-400"
+                        >
+                        Logout
+                        </button>
+                    ) : (
+                        <Link
+                        to="/login"
+                        className="inline-block text-xs sm:text-base px-5 py-2 cursor-pointer rounded-3xl text-white bg-blue-400 hover:bg-blue-600 hover:text-gray-300 duration-400"
+                        >
                         Login
-                    </a>
+                        </Link>
+                    )}
                 </nav>
             </Container>
         </header>

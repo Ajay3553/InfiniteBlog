@@ -6,8 +6,11 @@ import {apiResponse} from '../utils/apiResponse.js';
 import jwt from 'jsonwebtoken';
 
 const options = {
-    httpOnly : true,
-    secure : true
+    httpOnly: false,        // allow JS to read for now; switch to true later
+    secure: false,          // must be true for deployement
+    sameSite: 'lax',        // works fine for frontend -> backend
+    path: '/',              // cookie valid for entire site
+    maxAge: 7 * 24 * 60 * 60 * 1000
 }
 
 const generateAccessAndRefreshTokens = async(userId) => {
@@ -137,7 +140,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
             throw new apiError(401, "Refresh Token expired") // Validation
         }
 
-        const {accessToken, newRefreshToken} = await generateAccessAndRefreshTokens(user._id); // get New RefreshToken
+        const {accessToken, refreshToken: newRefreshToken} = await generateAccessAndRefreshTokens(user._id); // get New RefreshToken
 
         return res
         .status(200)
