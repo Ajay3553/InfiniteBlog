@@ -15,9 +15,11 @@ app.use(express.json());
 
 // Routes import
 import userRouter from './routes/user.routes.js'
+import blogRouter from './routes/blog.routes.js'
 
 //Routes Declaration
 app.use('/api/users', userRouter)
+app.use('/api/blogs', blogRouter)
 
 // http://localhost:8000/api/users/register
 
