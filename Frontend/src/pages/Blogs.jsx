@@ -17,7 +17,7 @@ function Blogs() {
             key={index}
             id={blog.id}
             title={blog.title}
-            image={blog.image}
+            blogImage={blog.blogImage}
             category={blog.category}
             author_name={blog.author.name}
             author_image={blog.author.image}

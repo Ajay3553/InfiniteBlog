@@ -1,39 +1,45 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React from 'react'
+import { Link } from 'react-router-dom'
 
 function BlogCard({
   id,
   title,
   category,
-  image,
+  blogImage,
   author_image,
   author_name,
-  date,
+  date
 }) {
+  const formattedDate = new Date(date).toLocaleDateString('en-US', {
+    month: 'long',
+    day: '2-digit',
+    year: 'numeric'
+  })
+
   return (
-    <div className='flex-[1_1_300px] max-w-[400px] border border-gray-200 shadow-md p-4 rounded-lg hover:shadow-lg transition-shadow hover:scale-101 duration-300'>
+    <div className="flex-[1_1_300px] max-w-[400px] border border-gray-200 shadow-md p-4 rounded-lg hover:shadow-lg transition-shadow hover:scale-101 duration-300">
       <Link to={`/blog/${id}`}>
         <img
-          src={image}
+          src={blogImage}
           alt={title}
-          className='w-full h-48 object-cover rounded-t-lg mb-4'
+          className="w-full h-48 object-cover rounded-t-lg mb-4"
         />
       </Link>
-      <p className='text-sm text-gray-600 mb-2'>{category}</p>
-      <h1 className='text-xl font-semibold text-gray-900 mb-3'>{title}</h1>
-      <div className='flex items-center space-x-3 text-sm text-gray-500'>
+      <p className="text-sm text-gray-600 mb-2">{category}</p>
+      <h1 className="text-xl font-semibold text-gray-900 mb-3">{title}</h1>
+      <div className="flex items-center space-x-3 text-sm text-gray-500">
         <img
           src={author_image}
           alt={author_name}
-          className='w-8 h-8 rounded-full'
+          className="w-8 h-8 rounded-full"
         />
         <div>
-          <p className='font-medium text-gray-700'>{author_name}</p>
-          <p>{date}</p>
+          <p className="font-medium text-gray-700">{author_name}</p>
+          <p>{formattedDate}</p>
         </div>
       </div>
     </div>
-  );
+  )
 }
 
-export default BlogCard;
+export default BlogCard

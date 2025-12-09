@@ -1,30 +1,49 @@
-import { useContext } from "react";
-import { BlogContext } from '../../context/BlogContext.jsx';
-import BlogCard from "../BlogCard.jsx";
+import { useContext } from 'react'
+import { BlogContext } from '../../context/BlogContext.jsx'
+import BlogCard from '../BlogCard.jsx'
 
 function LatestBlogs() {
-  const {blogData} = useContext(BlogContext);
+  const { blogData, loading, error } = useContext(BlogContext)
+  if (loading) {
+    return (
+      <div className="flex justify-center py-10">
+        <p className="text-gray-500">Loading latest blogs...</p>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="flex justify-center py-10">
+        <p className="text-red-500">{error}</p>
+      </div>
+    )
+  }
+
+  const latestThree = [...blogData].slice(-3).reverse()
+
   return (
     <div>
       <div className="flex justify-center">
         <h1 className="text-3xl font-bold px-2 py-2">Latest Blogs</h1>
       </div>
+
       <div className="w-full flex flex-wrap justify-center items-stretch gap-4 pt-8 pb-8 px-4">
-        {blogData.slice(-3).reverse().map((blog, index) => (
+        {latestThree.map((blog) => (
           <BlogCard
-            key={index}
-            id={blog.id}
+            key={blog._id}
+            id={blog._id}
             title={blog.title}
-            image={blog.image}
+            blogImage={blog.blogImage}
             category={blog.category}
-            author_name={blog.author.name}
-            author_image={blog.author.image}
-            date={blog.date}
+            author_name={blog.author?.username}
+            author_image={blog.author?.avatar}
+            date={blog.createdAt}
           />
         ))}
       </div>
     </div>
-  );
+  )
 }
 
-export default LatestBlogs;
+export default LatestBlogs
