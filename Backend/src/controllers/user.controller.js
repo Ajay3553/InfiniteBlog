@@ -6,12 +6,13 @@ import {apiResponse} from '../utils/apiResponse.js';
 import jwt from 'jsonwebtoken';
 
 const options = {
-    httpOnly: false,        // allow JS to read for now; switch to true later
-    secure: false,          // must be true for deployement
-    sameSite: 'lax',        // works fine for frontend -> backend
-    path: '/',              // cookie valid for entire site
+    httpOnly: true,        // JS (and XSS) cannot read tokens
+    secure: true,          // only over HTTPS
+    sameSite: 'lax',       // or 'none' with CSRF protection if cross-site
+    path: '/',
     maxAge: 7 * 24 * 60 * 60 * 1000
 }
+
 
 const generateAccessAndRefreshTokens = async(userId) => {
     try{
