@@ -22,9 +22,9 @@ router.route('/create').post(
     ),
     createBlog
 );
-router.route("/user/delete/:id").delete(verifyJWT, deleteBlog);
+router.route("/user/blog/delete/:id").delete(verifyJWT, deleteBlog);
 router.route("/user/blogs").get(verifyJWT, userBlogs);
-router.route("/user/update/:id").patch(
+router.route("/user/blog/update/:id").patch(
     verifyJWT,
     upload.fields(
         [

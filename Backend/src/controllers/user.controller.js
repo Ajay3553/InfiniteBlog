@@ -190,11 +190,21 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
 
 // const updatedUser // TODO: Future update Dashboard for updating there personal info
 
+const getCurrentUser = asyncHandler(async (req, res) => {
+    res.status(200).json(
+        new apiResponse(
+            200,
+            req.user,
+            "Current User Fetched Successfully"
+        )
+    )
+});
 
 export {
     registerUser,
     loginUser,
     logoutUser,
     refreshAccessToken,
-    changeCurrentPassword
+    changeCurrentPassword,
+    getCurrentUser
 }
