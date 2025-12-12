@@ -10,6 +10,7 @@ import Contact from './pages/Contact.jsx'
 import Login from './pages/Login.jsx'
 import Signup from './pages/Signup.jsx'
 import SingleBlog from './pages/SingleBlog.jsx'
+import Dashboard from './pages/Dashboard.jsx'
 
 const router = createBrowserRouter([
   {
@@ -43,6 +44,10 @@ const router = createBrowserRouter([
       {
         path: '/blog/:id',
         element: <SingleBlog />
+      },
+      {
+        path: '/dashboard',
+        element: <Dashboard />
       }
     ]
   }
