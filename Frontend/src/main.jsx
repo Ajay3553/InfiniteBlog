@@ -11,6 +11,7 @@ import Login from './pages/Login.jsx'
 import Signup from './pages/Signup.jsx'
 import SingleBlog from './pages/SingleBlog.jsx'
 import Dashboard from './pages/Dashboard.jsx'
+import CreateBlog from './pages/CreateBlog.jsx'
 
 const router = createBrowserRouter([
   {
@@ -48,6 +49,10 @@ const router = createBrowserRouter([
       {
         path: '/dashboard',
         element: <Dashboard />
+      },
+      {
+        path: 'create-blog',
+        element: <CreateBlog />
       }
     ]
   }
