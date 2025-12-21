@@ -1,4 +1,4 @@
-import { createContext, useEffect, useState } from "react";
+import { createContext, useEffect, useState, useCallback } from "react";
 
 export const BlogContext = createContext();
 
@@ -10,37 +10,47 @@ function BlogContextProvider({children}){
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    useEffect(() => {
-        const fetchAllBlogs = async() =>{
-            try {
-                setLoading(true);
-                setError(null);
+    const fetchAllBlogs = useCallback(async() => {
+        try {
+            setLoading(true);
+            setError(null);
 
-                const res = await fetch(ALL_BLOG_ENDPOINT);
-                const contentType = res.headers.get('content-type') || '';
-                if(!contentType.includes('application/json')){
-                    throw new Error('Unexpected response type');
-                }
+            const res = await fetch(ALL_BLOG_ENDPOINT);
+            const contentType = res.headers.get('content-type') || '';
+            if(!contentType.includes('application/json')){
+                throw new Error('Unexpected response type');
+            }
 
-                const result = await res.json();
-                if(!res.ok || !result?.success){
-                    throw new Error(result?.message || 'Failed to Load Blogs');
-                }
-                setBlogData(result?.data || []);
-            } catch (e) {
-                console.log("Error in allBlog API", e);;
-                setError(e.message || 'Failed to Load Blogs');
-                setBlogData([]);
+            const result = await res.json();
+            if(!res.ok || !result?.success){
+                throw new Error(result?.message || 'Failed to Load Blogs');
             }
-            finally{
-                setLoading(false)
-            }
+            setBlogData(result?.data || []);
+        } catch (e) {
+            console.log("Error in allBlog API", e);
+            setError(e.message || 'Failed to Load Blogs');
+            setBlogData([]);
         }
+        finally{
+            setLoading(false)
+        }
+    }, [])
 
+    useEffect(() => {
         fetchAllBlogs()
-    },[]);
+    }, [fetchAllBlogs]);
 
-    const contextValue = {blogData, loading, error};
+    const refetchBlogs = async () => {
+        await fetchAllBlogs()
+    }
+
+    const contextValue = {
+        blogData, 
+        loading, 
+        error, 
+        refetchBlogs
+    };
+
     return(
         <BlogContext.Provider value={contextValue}>
             {children}
