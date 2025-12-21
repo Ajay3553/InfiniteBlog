@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { upload } from "../middleware/multer.middleware.js";
-import { allBlogs, createBlog, deleteBlog, updateBlog, userBlogs } from "../controllers/blog.controller.js";
+import { allBlogs, createBlog, deleteBlog, getBlogById, updateBlog, userBlogs } from "../controllers/blog.controller.js";
 import { verifyJWT } from "../middleware/auth.middleware.js";
 
 const router = Router();
@@ -36,5 +36,7 @@ router.route("/user/blog/update/:id").patch(
     ),
     updateBlog
 );
+
+router.route("/user/blog/getBlog/:id").get(getBlogById);
 
 export default router;

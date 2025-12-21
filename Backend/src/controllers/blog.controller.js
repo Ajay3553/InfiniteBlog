@@ -3,6 +3,7 @@ import {Blog}  from '../models/blog.model.js';
 import { apiError } from "../utils/apiError.js";
 import { apiResponse } from "../utils/apiResponse.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import { v2 as cloudinary } from 'cloudinary';
 
 
 const allBlogs = asyncHandler(async (req, res) => {
@@ -68,7 +69,7 @@ const deleteBlog = asyncHandler(async (req, res) => {
     );
 });
 
-const getBlog = asyncHandler( async (req, res) => {
+const getBlogById = asyncHandler( async (req, res) => {
     const blogId = req.params.id;
     const blog = await Blog.findById(blogId);
     if(!blog) throw new apiError(404, "Blog not found");
@@ -86,8 +87,17 @@ const updateBlog = asyncHandler(async (req, res) => {
     const blogId = req.params.id;
     const {newTitle, newCategory, newDescription} = req.body;
     const blog = await Blog.findById(blogId);
-    if(!blog) throw new apiError(404, "Blog not found");
-    if(blog.author._id.toString() !== req.user._id.toString()) throw new apiError(403, "Unathorized request");
+    if(!blog) {
+        return res.status(404).json(
+            new apiResponse(404, {}, "Blog not found")
+        )
+    }
+    
+    if(blog.author._id.toString() !== req.user._id.toString()) {
+        return res.status(403).json(
+            new apiResponse(403, {}, "Unauthorized request")
+        )
+    }
 
     if(newTitle) blog.title = newTitle;
     if(newCategory) blog.category = newCategory;
@@ -95,6 +105,21 @@ const updateBlog = asyncHandler(async (req, res) => {
 
     const blogImageLocalPath = req.files?.blogImage?.[0]?.path;
     if(blogImageLocalPath){
+        const oldImageUrl = blog.blogImage;
+        if(oldImageUrl) {
+            try {
+                const urlParts = oldImageUrl.split('/');
+                const uploadIndex = urlParts.indexOf('upload');
+                const blogIdWithExt = urlParts.slice(uploadIndex + 2).join('/'); // Skip version number
+                const oldBlogId = blogIdWithExt.substring(0, blogIdWithExt.lastIndexOf('.')); // Remove extension
+                
+                await cloudinary.uploader.destroy(oldBlogId);
+                console.log("Old image deleted:", oldBlogId);
+            } catch (error) {
+                console.log("Error deleting old image from Cloudinary:", error);
+            }
+        }
+        
         const uploadedImage = await uploadOnCloudinary(blogImageLocalPath);
         blog.blogImage = uploadedImage.url;
     }
@@ -104,16 +129,17 @@ const updateBlog = asyncHandler(async (req, res) => {
     return res.status(200).json(
         new apiResponse(
             200,
-            {},
+            blog,
             "Blog Updated Successfully"
         )
     )
 });
 
+
 const userBlogs = asyncHandler( async (req, res) => {
     const blogs = await Blog.find({"author._id": req.user._id}).sort({createdAt : -1});
     if(!blogs || blogs.length === 0) throw new apiError(400, "No Blogs Found For this User");
-    res.status(200).json(
+    return res.status(200).json(
         new apiResponse(
             200,
             blogs,
@@ -122,11 +148,12 @@ const userBlogs = asyncHandler( async (req, res) => {
     )
 });
 
+
 export {
     allBlogs,
     createBlog,
     deleteBlog,
-    getBlog,
+    getBlogById,
     updateBlog,
     userBlogs
 }

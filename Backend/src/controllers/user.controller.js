@@ -4,6 +4,7 @@ import { uploadOnCloudinary } from '../utils/cloudinary.js';
 import {apiError} from '../utils/apiError.js';
 import {apiResponse} from '../utils/apiResponse.js';
 import jwt from 'jsonwebtoken';
+import { v2 as cloudinary } from 'cloudinary';
 
 const options = {
     httpOnly: true,        // JS (and XSS) cannot read tokens
@@ -164,14 +165,18 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 const changeCurrentPassword = asyncHandler(async (req, res) => {
     const {oldPassword, newPassword, confirmPassword} = req.body; // Data from Frontend
 
-    if(newPassword !== confirmPassword){ // Validation
-        throw new apiError(400, "New Password and Confirm Password must be same")
+    if(newPassword !== confirmPassword){
+        return res.status(400).json(
+            new apiResponse(400, {}, "New Password and Confirm Password must be same")
+        )
     }
 
     const user = await User.findById(req.user?._id);
     const isCorrectPassword = await user.isPasswordCorrect(oldPassword);
-    if(!isCorrectPassword){ // Valid User OldPassword
-        throw new apiError(400, "Wrong Password");
+    if(!isCorrectPassword){
+        return res.status(401).json(
+            new apiResponse(401, {}, "Current password is incorrect")
+        )
     }
 
     user.password = newPassword; //updated Password
@@ -188,7 +193,46 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
     )
 })
 
-// const updatedUser // TODO: Future update Dashboard for updating there personal info
+const updateUserInfo = asyncHandler(async (req, res) => {
+    const {newFullName, newEmail} = req.body;
+    const user = await User.findById(req.user?._id);
+    if(!user){
+        throw new apiError(403, "Unauthorized Request");
+    }
+    if(newFullName) user.fullName = newFullName;
+    if(newEmail) user.email = newEmail;
+
+    const avatarImageLocalPath = req.files?.avatar?.[0]?.path;
+    if(avatarImageLocalPath){
+        const oldAvatar = user.avatar;
+        if(oldAvatar){
+            try{
+                const urlParts = oldAvatar.split('/');
+                const uploadIndex = urlParts.indexOf('upload');
+                const avatarIdWithExt = urlParts.slice(uploadIndex + 2).join('/');
+                const oldAvatarId = avatarIdWithExt.substring(0, avatarIdWithExt.lastIndexOf('.'));
+
+                await cloudinary.uploader.destroy(oldAvatarId);
+                console.log("Old avatar deleted: ",oldAvatarId);
+            }
+            catch(e){
+                console.log("Error deleting old avatar from cloudinary: ", e);
+            }
+        }
+
+        const uploadedAvatar = await uploadOnCloudinary(avatarImageLocalPath);
+        user.avatar = uploadedAvatar.url;
+    }
+    await user.save({validateBeforeSave: false})
+
+    return res.status(200).json(
+        new apiResponse(
+            200,
+            user,
+            "User Info Updated Successfully"
+        )
+    )
+})
 
 const getCurrentUser = asyncHandler(async (req, res) => {
     res.status(200).json(
@@ -206,5 +250,6 @@ export {
     logoutUser,
     refreshAccessToken,
     changeCurrentPassword,
-    getCurrentUser
+    getCurrentUser,
+    updateUserInfo
 }
