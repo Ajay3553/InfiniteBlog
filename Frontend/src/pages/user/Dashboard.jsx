@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { FiPlus, FiEdit2, FiTrash2, FiEye } from 'react-icons/fi'
 import { BiCalendar } from 'react-icons/bi'
+import { CiEdit } from "react-icons/ci";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
 const CURRENT_USER_ENDPOINT = `${API_BASE_URL}/api/users/current-user`
@@ -126,13 +127,22 @@ function Dashboard() {
                     <p className="text-gray-500">Manage your blogs and content</p>
                 </div>
                 </div>
-                <button
-                onClick={() => navigate('/create-blog')}
-                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-teal-500 to-blue-500 text-white rounded-lg hover:from-teal-600 hover:to-blue-600 transition-all font-medium shadow-md hover:shadow-lg"
-                >
-                <FiPlus className="text-xl" />
-                Create New Blog
-                </button>
+                <div className='flex flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:w-auto'>
+                    <button
+                    onClick={() => navigate('/update-personal-info')}
+                    className="flex items-center gap-2 px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all font-medium shadow-md hover:shadow-lg"
+                    >
+                        <CiEdit className="text-xl" />
+                        <span className="whitespace-nowrap">Update Personal Info</span>
+                    </button>
+                    <button
+                    onClick={() => navigate('/create-blog')}
+                    className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-teal-500 to-blue-500 text-white rounded-lg hover:from-teal-600 hover:to-blue-600 transition-all font-medium shadow-md hover:shadow-lg"
+                    >
+                        <FiPlus className="text-xl" />
+                        <span className="whitespace-nowrap">Create New Blog</span>
+                    </button>
+                </div>
             </div>
             </div>
 

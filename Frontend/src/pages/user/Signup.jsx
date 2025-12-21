@@ -2,7 +2,7 @@ import React from 'react'
 import { useForm } from 'react-hook-form'
 import { Link, useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
-import logo from '../assets/logo.png'
+import logo from '../../assets/logo.png'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
 const REGISTER_ENDPOINT = `${API_BASE_URL}/api/users/register`
