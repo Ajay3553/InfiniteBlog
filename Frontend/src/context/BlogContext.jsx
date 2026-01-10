@@ -1,4 +1,4 @@
-import { createContext, useEffect, useState, useCallback } from "react";
+import { createContext, useEffect, useState, useCallback, useMemo } from "react";
 
 export const BlogContext = createContext();
 
@@ -10,6 +10,7 @@ function BlogContextProvider({children}){
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    // Memoize fetch function
     const fetchAllBlogs = useCallback(async() => {
         try {
             setLoading(true);
@@ -40,16 +41,18 @@ function BlogContextProvider({children}){
         fetchAllBlogs()
     }, [fetchAllBlogs]);
 
-    const refetchBlogs = async () => {
+    // Memoize refetch function
+    const refetchBlogs = useCallback(async () => {
         await fetchAllBlogs()
-    }
+    }, [fetchAllBlogs])
 
-    const contextValue = {
+    // Memoize context value to prevent unnecessary re-renders
+    const contextValue = useMemo(() => ({
         blogData, 
         loading, 
         error, 
         refetchBlogs
-    };
+    }), [blogData, loading, error, refetchBlogs]);
 
     return(
         <BlogContext.Provider value={contextValue}>
